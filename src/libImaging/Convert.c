@@ -769,6 +769,22 @@ I16B_I(UINT8 *out_, const UINT8 *in, int xsize) {
 }
 
 static void
+I16_I16(UINT8 *out, const UINT8 *in, int xsize) {
+    /* same byte order, e.g. I;16 to I;16L */
+    memcpy(out, in, xsize * 2);
+}
+
+static void
+I16_I16swap(UINT8 *out, const UINT8 *in, int xsize) {
+    /* opposite byte order, e.g. I;16 to I;16B */
+    int x;
+    for (x = 0; x < xsize; x++, in += 2) {
+        *out++ = in[1];
+        *out++ = in[0];
+    }
+}
+
+static void
 I16L_F(UINT8 *out_, const UINT8 *in, int xsize) {
     int x;
     for (x = 0; x < xsize; x++, in += 2, out_ += 4) {
@@ -1592,6 +1608,28 @@ static struct {
 #else
     {IMAGING_MODE_L, IMAGING_MODE_I_16N, L_I16L},
     {IMAGING_MODE_I_16N, IMAGING_MODE_L, I16L_L},
+#endif
+
+    {IMAGING_MODE_I_16, IMAGING_MODE_I_16L, I16_I16},
+    {IMAGING_MODE_I_16L, IMAGING_MODE_I_16, I16_I16},
+    {IMAGING_MODE_I_16, IMAGING_MODE_I_16B, I16_I16swap},
+    {IMAGING_MODE_I_16B, IMAGING_MODE_I_16, I16_I16swap},
+    {IMAGING_MODE_I_16L, IMAGING_MODE_I_16B, I16_I16swap},
+    {IMAGING_MODE_I_16B, IMAGING_MODE_I_16L, I16_I16swap},
+#ifdef WORDS_BIGENDIAN
+    {IMAGING_MODE_I_16, IMAGING_MODE_I_16N, I16_I16swap},
+    {IMAGING_MODE_I_16N, IMAGING_MODE_I_16, I16_I16swap},
+    {IMAGING_MODE_I_16L, IMAGING_MODE_I_16N, I16_I16swap},
+    {IMAGING_MODE_I_16N, IMAGING_MODE_I_16L, I16_I16swap},
+    {IMAGING_MODE_I_16B, IMAGING_MODE_I_16N, I16_I16},
+    {IMAGING_MODE_I_16N, IMAGING_MODE_I_16B, I16_I16},
+#else
+    {IMAGING_MODE_I_16, IMAGING_MODE_I_16N, I16_I16},
+    {IMAGING_MODE_I_16N, IMAGING_MODE_I_16, I16_I16},
+    {IMAGING_MODE_I_16L, IMAGING_MODE_I_16N, I16_I16},
+    {IMAGING_MODE_I_16N, IMAGING_MODE_I_16L, I16_I16},
+    {IMAGING_MODE_I_16B, IMAGING_MODE_I_16N, I16_I16swap},
+    {IMAGING_MODE_I_16N, IMAGING_MODE_I_16B, I16_I16swap},
 #endif
 
     {IMAGING_MODE_I_16, IMAGING_MODE_F, I16L_F},

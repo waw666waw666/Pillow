@@ -117,3 +117,17 @@ def test_convert_i16_f(mode: str) -> None:
 def test_convert_f_i16(mode: str, value: float) -> None:
     im = Image.new("F", (1, 1), value)
     assert im.convert(mode).getpixel((0, 0)) == min(max(0, int(value)), 65535)
+
+
+@pytest.mark.parametrize("from_mode", ("I;16", "I;16L", "I;16B", "I;16N"))
+@pytest.mark.parametrize("to_mode", ("I;16", "I;16L", "I;16B", "I;16N"))
+def test_convert_i16_byte_order(from_mode: str, to_mode: str) -> None:
+    im = Image.new(from_mode, (2, 1))
+    im.putpixel((0, 0), 4660)
+    im.putpixel((1, 0), 65535)
+
+    converted = im.convert(to_mode)
+    assert converted.mode == to_mode
+    assert converted.getpixel((0, 0)) == 4660
+    assert converted.getpixel((1, 0)) == 65535
+    assert converted.tobytes() == im.convert("I").convert(to_mode).tobytes()
